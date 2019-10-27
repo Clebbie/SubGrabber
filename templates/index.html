@@ -1,5 +1,12 @@
 <html>
 	<body>
-		{{user_id}} {{access_token}}
+		{{user_id}} {{access_token}} {{is_expired}} {{first_time}}
+
+
+		{% if first_time %}
+			<p>is first time</p>
+		{% else %}
+			<p>NOT first time</p>
+		{% endif %}
 	</body>
 </html>
