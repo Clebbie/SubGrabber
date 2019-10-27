@@ -1,12 +1,43 @@
+<!DOCTYPE html>
 <html>
+	<head>
+		<title>Twitch SubGrabber</title>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+		<style>
+			.header {
+				margin-top: 20px;
+			}
+		</style>
+	</head>
 	<body>
-		{{user_id}} {{access_token}} {{is_expired}} {{first_time}}
+		<div class="ui container">
+			<h1 class="ui dividing header">Twitch SubGrabber <div class="ui horizontal label">v0.1-dev</div></h1>
 
+			{% if first_time %}
+				<div class="ui centered card">
+					<div class="content">
+						<div class="header">Sign into Twitch</div>
+						<div class="description">
+							Click the button below to sign into your Twitch account to get started!
+						</div>
+					</div>
+					<div class="ui bottom attached button" id="twitch-oauth">
+						<i class="twitch icon"></i>
+						Twitch OAuth
+					</div>
+				</div>
+			{% endif %}
 
-		{% if first_time %}
-			<p>is first time</p>
-		{% else %}
-			<p>NOT first time</p>
-		{% endif %}
+		</div>
+
+		<script>
+			$("#twitch-oauth").click(function() {
+				document.location.href = "https://id.twitch.tv/oauth2/authorize?client_id=a0eq55k1fyehqztfwcr0bx6y9b8j5z&redirect_uri=http://localhost:5000/auth_success&response_type=token&scope=channel:read:subscriptions";
+			});
+		</script>
 	</body>
 </html>
