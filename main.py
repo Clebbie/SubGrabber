@@ -24,7 +24,10 @@ def index():
 def route_auth():
 	data = request.get_json()
 	print(data['access_token'])
-	print(str(validateKey(data['access_token'])))
+	if(validateKey(data['access_token'])):
+		return 'Success!\n',200
+	else:
+		return 'Invalid or Expired key!\n', 401
 	#run GET request to validate key
 	#return true/ false
 	return 'Success!\n',200
@@ -35,7 +38,7 @@ def validateKey(key):
 	twitchURL =  'https://id.twitch.tv/oauth2/validate'
 	validationHeaderKey = 'Authorization'
 	validationHeaderValue = 'OAuth ' + key
-	response = requests.get(twitchURL,params=[(validationHeaderKey,validationHeaderValue)])
+	response = requests.get(twitchURL,headers={validationHeaderKey : validationHeaderValue})
 
 	data = json.loads(response.content.decode('utf-8'))
 
