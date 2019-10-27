@@ -24,7 +24,12 @@
             };
 
             // Execute authentication request
-            $.post("/auth", data=JSON.stringify(data), dataType="application/json");
+            $.ajax({
+                url: "/auth",
+                method: "POST",
+                data: JSON.stringify(data),
+                contentType: "application/json"
+            });
         </script>
     </body>
 </html>
