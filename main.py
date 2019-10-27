@@ -1,14 +1,16 @@
 from flask import Flask
 from flask import request
+from flask import render_template
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/auth_success", methods = ['GET'])
 def hello():
-	print('This is headers:\n' + str(request.headers))
-	print('This is data:\n' + str(request.data))
-	print('This is url:\n' + str(request.url))
-	print(request.args.to_dict())
-	return 'Success',200
+	return render_template('auth_success.html')
 
+@app.route("/auth", methods = ['POST'])
+def getBody():
+	data = request.get_json()
+	print(data)
+	return 'Success!\n',200
 if __name__ == "__main__":
     app.run()
