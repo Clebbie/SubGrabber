@@ -12,7 +12,7 @@ Serves index.html
 ### HTML Variables
 - access_token (string) - Twitch OAuth Bearer token
 - user_id (string) - Twitch user ID
-- is_expired (boolean) - Whether or not the token is expired
+- is_valid(boolean) - Whether or not the token is currently valid (using id.twitch /validate)
 - first_time (boolean) - Whether or not the first time user
 
 ## Route /auth_success
