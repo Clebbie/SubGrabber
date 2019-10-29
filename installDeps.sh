@@ -2,3 +2,4 @@
 pip install flask
 pip install appdirs
 pip install requests
+pip install keyboard
