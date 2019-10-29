@@ -18,6 +18,7 @@ def route_authSuccess():
 def index():
 	accessToken = ''
 	userID = ''
+	isValid = False
 	isFirstTime = not doesDataExist()
 	if(not isFirstTime):
 		file = open(appDirectory.user_data_dir + '/user.sg', 'r')
@@ -28,7 +29,7 @@ def index():
 		userInfo = json.loads(rawData)
 		userID = userInfo['data'][0]['id']
 		accessToken = userInfo['data'][0]['access_token']
-	isValid = False
+		isValid = validateKey(accessToken)
 	print('***************')
 	print('accessToken = ' + accessToken + '\nuserID = ' + userID + '\nisFirstTime= ' + str(isFirstTime))
 	return render_template('index.html', access_token=accessToken, user_id=userID, is_valid=isValid, first_time=isFirstTime)
@@ -58,7 +59,11 @@ def validateKey(key):
 
 	print(data)
 	if ('expires_in' in data and int(data['expires_in']) >= 60):
+		print('***********\n')
+		print(key + ' is valid')
 		return True
+	print('***********\n')
+	print(key + ' is NOT valid')
 	return False
 
 def doesDataExist():
