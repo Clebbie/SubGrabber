@@ -7,36 +7,201 @@
 		<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
-		<style>
-			.header {
-				margin-top: 20px;
+		<style type="text/css">
+			body {
+				padding-top: 20px;
+			}
+
+			#user-info {
+				padding: 15px;
+				display: grid;
+				grid-template-columns: 150px 20px auto;
+				cursor: pointer;
+			}
+
+			#user-photo {
+				grid-column: 1 / 2;
+			}
+
+			#user-desc {
+				grid-column: 3 / 4;
+				margin: 10px;
+			}
+
+			#user-desc .placeholder {
+				margin-top: 15px;
+			}
+
+			#user-desc-content .header {
+				display: flex;
+				align-items: center;
+				margin-bottom: 10px;
+			}
+
+			#user-desc-content .header .username {
+				margin: 0 5px 0 0;
+			}
+
+			#user-desc-content .header .broadcaster-type {
+				margin-right: 5px;
+			}
+
+			#user-info .share.icon {
+				position: absolute;
+				right: 0;
+				bottom: 10px;
+				color: #999999;
 			}
 		</style>
 	</head>
 	<body>
-		<div class="ui container">
-			<h1 class="ui dividing header">Twitch SubGrabber <div class="ui horizontal label">v0.1-dev</div></h1>
+		<div class="ui container" data-access-token="{{access_token}}" data-user-id="{{user_id}}">
+			<h1 class="ui dividing header" id="page-header">
+				Twitch SubGrabber
+				<div class="ui horizontal tiny blue label">v0.1-dev</div>
+			</h1>
 
 			{% if first_time %}
-				<div class="ui centered card">
+				<div class="ui info message">
+					<i class="close icon"></i>
+					<div class="header">
+					  Welcome to SubGrabber!
+					</div>
+					<p>To get started, login with your Twitch account below!</p>
+				</div>
+			{% elif not is_valid %}
+				<div class="ui negative message">
+					<i class="close icon"></i>
+					<div class="header">
+					  Twitch Authentication Error
+					</div>
+					<p>Please login to Twitch again!</p>
+				</div>
+			{% endif %}
+
+			{% if not is_valid %}
+				<div class="ui fluid raised card">
 					<div class="content">
-						<div class="header">Sign into Twitch</div>
+						<div class="header">Authenticate your Twitch Account</div>
 						<div class="description">
-							Click the button below to sign into your Twitch account to get started!
+							Click the button below to sign into your Twitch account!
 						</div>
 					</div>
-					<div class="ui bottom attached button" id="twitch-oauth">
+					<div class="ui bottom attached violet button" id="twitch-oauth">
 						<i class="twitch icon"></i>
 						Twitch OAuth
+					</div>
+				</div>
+			{% else %}
+				<div id="content">
+					<div class="ui segment" id="user-info">
+						<div id="user-photo">
+							<div class="ui fluid placeholder">
+								<div class="square image"></div>
+							</div>
+							<img class="ui small image hidden" src="">
+						</div>
+						<div id="user-desc">
+							<div class="ui fluid placeholder">
+								<div class="header">
+									<div class="line"></div>
+								</div>
+								<div class="paragraph">
+									<div class="line"></div>
+									<div class="line"></div>
+									<div class="line"></div>
+								</div>
+							</div>
+							<div class="hidden" id="user-desc-content">
+								<div class="header">
+									<h2 class="username"></h2>
+									<div class="ui small violet label broadcaster-type hidden"></div>
+									<div class="ui small label views hidden"></div>
+								</div>
+								<p class="description"></p>
+							</div>
+						</div>
+						<i class="share square icon"></i>
+					</div>
+
+					<div class="ui secondary segment">
+						<h2>How to User SubGrabber</h2>
+						<p>
+							SubGrabber will pull in your subscribers and copy a random subscriber into your computers clipboard.
+							It then exposes the keyboard shortcuts listed below that allow you to interact with your subscribers'
+							user names.
+						</p>
+						<h3><u>Keyboard Shortcuts</u></h3>
+						<p><b>Ctr + Shift + T</b> - Pastes a random subscriber's user name by executing a Ctr+V keystroke.</p>
 					</div>
 				</div>
 			{% endif %}
 
 		</div>
 
-		<script>
+		{% if is_valid %}
+			<script type="text/javascript">
+				$(function() {
+					const accessToken = $(".container").data("access-token");
+					const userId = $(".container").data("user-id");
+
+					function setUserData(data) {
+						// Set user image
+						$("#user-photo .image").attr("src", data.profile_image_url);
+						$("#user-photo .image").on("load", function() {
+							$("#user-photo .image").removeClass("hidden");
+							$("#user-photo .placeholder").hide();
+						});
+
+						// Set user desc
+						$("#user-desc .placeholder").hide();
+						$("#user-desc-content").removeClass("hidden");
+						$("#user-desc-content .header .username").text(data.display_name);
+						if (data.broadcaster_type) {
+							$("#user-desc-content .header .broadcaster-type")
+							.removeClass("hidden")
+							.text(data.broadcaster_type);
+						}
+						$("#user-desc-content .header .views")
+							.removeClass("hidden")
+							.text(`${data.view_count} views`);
+						$("#user-desc-content .description").text(data.description);
+
+						// Set link to user channel
+						$("#user-info").click(function() {
+							window.open(`https://twitch.tv/${data.login}`, "_blank");
+						});
+					}
+
+					// Wait .25 seconds to load user data
+					// Prevents quick flash on page load
+					setTimeout(function() {
+						$.ajax({
+							url: "https://api.twitch.tv/helix/users",
+							method: "GET",
+							headers: { Authorization: `Bearer ${accessToken}`},
+							success: function(res) {
+								setUserData(res.data[0]);
+							}
+						});
+					}, 250); 
+				});
+			</script>
+		{% endif %}
+
+		<script type="text/javascript">
 			$("#twitch-oauth").click(function() {
 				document.location.href = "https://id.twitch.tv/oauth2/authorize?client_id=a0eq55k1fyehqztfwcr0bx6y9b8j5z&redirect_uri=http://localhost:5000/auth_success&response_type=token&scope=channel:read:subscriptions";
+			});
+
+			$('.message .close').on('click', function() {
+				$(this).closest('.message').transition('fade');
+			});
+
+			$("#user-info").hover(function() {
+				$("#user-info .share.icon").addClass("black");
+			}, function() {
+				$("#user-info .share.icon").removeClass("black");
 			});
 		</script>
 	</body>

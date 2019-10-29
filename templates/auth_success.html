@@ -7,28 +7,60 @@
         <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+        <style type="text/css">
+            .container {
+                margin-top: 20px;
+            }
+        </style>
     </head>
     <body>
         <div class="ui active inverted dimmer">
             <div class="ui text loader">Authenticating</div>
         </div>
+        <div class="ui container">
+            <div class="ui negative message">
+                <div class="header">
+                    Error
+                </div>
+                <p></p>
+            </div>
+        </div>
 
         <script type="text/javascript">
-            // Parse access token from URL hash
-            const hash = location.hash.slice(1);
-            const access_token = hash.split('&')[0].split('=')[1];
+            $(function() {
+                $(".container").hide();
 
-            // Build authentication request data object
-            let data = {
-                access_token
-            };
+                // Parse access token from URL hash
+                const hash = location.hash.slice(1);
+                const access_token = hash.split('&')[0].split('=')[1];
 
-            // Execute authentication request
-            $.ajax({
-                url: "/auth",
-                method: "POST",
-                data: JSON.stringify(data),
-                contentType: "application/json"
+                // Build authentication request data object
+                let data = {
+                    access_token
+                };
+
+                // Execute authentication request
+                $.ajax({
+                    url: "/auth",
+                    method: "POST",
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    statusCode: {
+                        200: function() {
+                            document.location.href = "/";
+                        },
+                        401: function() {
+                            $(".dimmer").removeClass("active");
+                            $(".container").show();
+                            $(".message p").text("There was an error validating your Twitch login. Please try again or submit a bug report!")
+                        },
+                        500: function() {
+                            $(".dimmer").removeClass("active");
+                            $(".container").show();
+                            $(".message p").text("An internal error has occured. Please submit a bug report!");
+                        }
+                    }
+                });
             });
         </script>
     </body>
