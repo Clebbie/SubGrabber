@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./installDeps.sh
+python main.py
+
