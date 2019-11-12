@@ -3,11 +3,21 @@ from flask import request
 from flask import render_template
 from appdirs import *
 import os
+import subprocess
 import requests
 import json
-app = Flask(__name__)
+import clipboard
+import random
 
+#Sets up a couple global items
+#Flask => Local Webserver
+#ClientID for the bot
+#The subprocess that listens to the keyboard
+app = Flask(__name__)
 clientID = 'a0eq55k1fyehqztfwcr0bx6y9b8j5z'
+keyboadListener = subprocess.Popen(["python","keystrokeListener.py"], stdout=None, stdin=subprocess.PIPE, stderr=None, shell = False)
+
+#Data Directory for user.sg is /home/.local/share/SubGrabber
 appDirectory = AppDirs('SubGrabber', 'Yarnball')
 
 @app.route("/auth_success", methods = ['GET'])
@@ -20,6 +30,7 @@ def index():
 	userID = ''
 	isValid = False
 	isFirstTime = not doesDataExist()
+	#Verify if user information already exists on hand
 	if(not isFirstTime):
 		file = open(appDirectory.user_data_dir + '/user.sg', 'r')
 		fileData = file.readlines()
@@ -58,6 +69,9 @@ def validateKey(key):
 	data = json.loads(response.content.decode('utf-8'))
 
 	print(data)
+	#This is temp- it was ment to test functionality
+	getUsersFollowers()
+
 	if ('expires_in' in data and int(data['expires_in']) >= 60):
 		print('***********\n')
 		print(key + ' is valid')
@@ -74,6 +88,16 @@ def doesDataExist():
 	else:
 		print('First time setup')
 		return False
+#Returns a JSON of the user from user.sg
+def getUser():
+	file = open(appDirectory.user_data_dir + '/user.sg','r')
+	fileData = file.readlines()
+	rawData = ''
+	for line in fileData:
+		rawData += line
+	userInfo = json.loads(rawData)
+	file.close()
+	return userInfo
 
 def createUserFile(access_token):
 	if not doesDataExist():
@@ -102,6 +126,19 @@ def insertAccessToken(access_token):
 	file = open(fileName, 'w+')
 	file.write(json.dumps(userInfo,ensure_ascii=True))
 	file.close()
+
+def getUsersFollowers():
+	#Get User, format url, then execut GET request. This needs to be changed to subscribers not followers
+	user = getUser()
+	ClientKey = 'Client-ID'
+	url = 'https://api.twitch.tv/kraken/channels/' +  user['data'][0]['id'] + '/follows'
+	response = requests.get(url,headers={'Accept' : 'application/vnd.twitchtv.v5+json',ClientKey : clientID})
+	followers = json.loads(response.content)
+	total = int(followers['_total'])
+	#Generate random number < the total number of followers returned. Then copy random follower to clipboard
+	random.seed()
+	randomName = followers['follows'][random.randint(0,total)]['user']['name']
+	clipboard.copy(randomName)
 
 if __name__ == "__main__":
     app.run()
