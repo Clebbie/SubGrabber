@@ -31,3 +31,10 @@ Sets up internal use of Twitch OAuth token.
 ### Response Codes
 - 200 - Token is validated and SubGrabber is successfully configured
 - 401 - Token is invalid or SubGrabber was not successfully configured
+
+## TODO:
+- Look into seeing where the main application will be running vs where there server is
+- Generate a config file to edit keystroke commands
+- Add more functionality to keystroke listener (i.e. command to stop/start listening)
+- Monitor performance? Cannot have any memory leaks
+- Test functionality so far on Windows
