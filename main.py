@@ -32,7 +32,8 @@ def index():
 	isFirstTime = not doesDataExist()
 	#Verify if user information already exists on hand
 	if(not isFirstTime):
-		file = open(appDirectory.user_data_dir + '/user.sg', 'r')
+		fileName = getFileName()
+		file = open(fileName, 'r')
 		fileData = file.readlines()
 		rawData = ''
 		for line in fileData:
@@ -59,6 +60,12 @@ def route_auth():
 	#return true/ false
 	return 'Success!\n',200
 	#return 'Invalid!\n',401
+
+def getFileName():
+	directory = appDirectory.user_data_dir
+	if('\\' in directory):
+		return directory + '\\user.sg'
+	return directory + '/user.sg'
 
 def validateKey(key):
 	twitchURL =  'https://id.twitch.tv/oauth2/validate'
@@ -90,7 +97,7 @@ def doesDataExist():
 		return False
 #Returns a JSON of the user from user.sg
 def getUser():
-	file = open(appDirectory.user_data_dir + '/user.sg','r')
+	file = open(getFileName(),'r')
 	fileData = file.readlines()
 	rawData = ''
 	for line in fileData:
@@ -115,7 +122,7 @@ def createUserFile(access_token):
 
 def insertAccessToken(access_token):
 	userInfor = ''
-	file = open(appDirectory.user_data_dir + '/user.sg', 'r')
+	file = open(getFileName(), 'r')
 	fileData = file.readlines()
 	rawData = ''
 	for line in fileData:
